@@ -1,0 +1,17 @@
+﻿@model Mascota
+
+@{
+    ViewData["Title"] = "Borrar Mascota";
+}
+
+<h1>Eliminación de mascota</h1>
+
+<p>
+    ¿Estas seguro que deseas eliminar a <strong> @Model.Nombre </strong> de tu lista de mascotas?
+</p>
+
+<form asp-controller="Mascotas" asp-action="BorrarMascota">
+    <input type="hidden" asp-for="MascotaId" />
+    <button class="btn btn-danger">Borrar</button>
+    <a class="btn btn-primary" asp-action="Index">Cancelar</a>
+</form>

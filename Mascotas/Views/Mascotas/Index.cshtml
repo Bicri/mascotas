@@ -1,0 +1,95 @@
+﻿@model List<Mascota>
+@{
+    ViewData["Title"] = "Mis mascotas";
+}
+
+<div class="text-center">
+    <h1 class="display-4">CRUD de mascotas</h1>
+    <p>Aquí podrás administrar tus mascotas.</p>
+</div>
+
+<div class="my-5">
+    <a class="btn btn-success px-5" asp-controller="Mascotas" asp-action="Crear">Crear mascota</a>
+</div>
+
+<div class="my-3">
+    <input type="text" id="buscador" class="form-control" placeholder="Buscar por nombre...">
+</div>
+
+<table class="table" id="mascotasTabla">
+    <thead>
+        <tr>
+            <th>Acciones</th>
+            <th>Nombre Mascota</th>
+            <th>Edad</th>
+            <th>Tipo Mascota</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(Mascota mascota in Model)
+        {
+            <tr>
+                <td>
+                    <a class="btn btn-primary m-2" asp-action="Editar" asp-route-id="@mascota.MascotaId">Editar</a>
+                    <a class="btn btn-danger"  asp-action="Borrar" asp-route-id="@mascota.MascotaId">Eliminar</a>
+                </td>
+                <td>
+                    @mascota.Nombre
+                </td>
+                <td>
+                    @mascota.Edad
+                </td>
+                <td>
+                    @mascota.TipoMascota.ToString()
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#buscador').on('input', function () {
+                const buscador = $(this).val().trim();
+                if (buscador.length === 0 || buscador.trim().replace(/\s+/g, '').length >= 3) {
+                    buscarMascotas(buscador);
+                }
+            });
+
+            function buscarMascotas(coincidencia) {
+                $.ajax({
+                    url: '@Url.Action("BuscarCoincidencias", "Mascotas")',
+                    type: 'GET',
+                    data: { nombre: coincidencia },
+                    success: function (result) {
+                        actualizarTabla(result);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+            function actualizarTabla(mascotas) {
+                var tabla = $('#mascotasTabla tbody');
+                tabla.empty();
+                $.each(mascotas, function (index, mascota) {
+                    const { mascotaId, nombre, edad, tipoMascota, tipoMascotaStr } = mascota;
+                    var row = $('<tr></tr>');
+                    row.append('<td>' +
+                        '<a class="btn btn-primary m-2" href="/Mascotas/Editar/' + mascotaId + '">Editar</a>' +
+                        '<a class="btn btn-danger" href="/Mascotas/Borrar/' + mascotaId + '">Eliminar</a>' +
+                        '</td>');
+                    row.append('<td>' + nombre + '</td>');
+                    row.append('<td>' + edad + '</td>');
+                    row.append('<td>' + tipoMascotaStr + '</td>');
+                    tabla.append(row);
+                });
+            }
+        });
+    </script>
+}
+
+
+

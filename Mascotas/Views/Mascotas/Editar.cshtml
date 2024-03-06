@@ -1,0 +1,39 @@
+﻿@using Mascotas.Models.DTO
+@model ActualizarMascotaDTO
+
+@{
+    ViewData["Title"] = "Editar Mascota";
+}
+
+<h1>Edición de mascota</h1>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-controller="Mascotas" asp-action="Editar">
+    <input type="hidden" asp-for="MascotaId" />
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input type="text" asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Edad" class="form-label"></label>
+        <input type="number" asp-for="Edad" class="form-control" />
+        <span asp-validation-for="Edad" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ListadoMascotas" class="form-label"></label>
+        <select class="form-select" asp-for="TipoMascotaEscogido" asp-items="Model.ListadoMascotas"></select>
+        <span asp-validation-for="ListadoMascotas" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a class="btn btn-danger" asp-action="Index">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
