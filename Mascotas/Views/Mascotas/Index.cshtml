@@ -1,22 +1,59 @@
 ﻿@model List<Mascota>
 @{
     ViewData["Title"] = "Mis mascotas";
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">CRUD de mascotas</h1>
-    <p>Aquí podrás administrar tus mascotas.</p>
+<!------------------------------- Modal -------------------------------------------->
+<div class="modal fade" id="eliminarModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="eliminarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eliminarModalLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar a la mascota <span id="nombreMascota"></span> de tipo <span id="tipoMascota"></span>?</p>
+                <input type="hidden" id="idMascotaHidden">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="eliminarMascota">Eliminar</button>
+            </div>
+        </div>
+    </div>
 </div>
+<!---------------------------------------------------------------------------------->
+<!------------------------------- TOAST de error -------------------------------------------->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Ha ocurrido un error en el servidor. Inténtalo mas tarde o comunicate con el área desarrollo
+        </div>
+    </div>
+</div>
+<!---------------------------------------------------------------------------------->
 
-<div class="my-5">
-    <a class="btn btn-success px-5" asp-controller="Mascotas" asp-action="Crear">Crear mascota</a>
+<div class="text-center">
+    <h1 class="display-4 fw-bolder">Administración de mascotas</h1>
+    <p class="text-start">En esta aplicación podrás llevar el registro de tus mascotas. A continuación se muestran las mascotas por orden de ingreso</p>
 </div>
 
 <div class="my-3">
-    <input type="text" id="buscador" class="form-control" placeholder="Buscar por nombre...">
+    <a class="btn btn-success px-5" asp-controller="Mascotas" asp-action="Crear">Crear mascota</a>
 </div>
 
-<table class="table" id="mascotasTabla">
+<div class="row">
+    <div class="col-md-6">
+        <input type="text" id="buscador" class="form-control rounded-pill p-2" placeholder="Buscar por nombre...">
+    </div>
+</div>
+
+<table class="table table-hover shadow rounded my-3" id="mascotasTabla">
     <thead>
         <tr>
             <th>Acciones</th>
@@ -28,18 +65,20 @@
     <tbody>
         @foreach(Mascota mascota in Model)
         {
-            <tr>
-                <td>
+            <tr data-id="@mascota.MascotaId">
+                <td class="align-middle">
                     <a class="btn btn-primary m-2" asp-action="Editar" asp-route-id="@mascota.MascotaId">Editar</a>
-                    <a class="btn btn-danger"  asp-action="Borrar" asp-route-id="@mascota.MascotaId">Eliminar</a>
+                    <a class="btn btn-danger eliminar-btn" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="@mascota.MascotaId" data-nombre="@mascota.Nombre" data-tipo="@mascota.TipoMascota.ToString()">
+                        Eliminar
+                    </a>
                 </td>
-                <td>
+                <td class="align-middle">
                     @mascota.Nombre
                 </td>
-                <td>
+                <td class="align-middle">
                     @mascota.Edad
                 </td>
-                <td>
+                <td class="align-middle">
                     @mascota.TipoMascota.ToString()
                 </td>
             </tr>
@@ -48,47 +87,91 @@
 </table>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#buscador').on('input', function () {
-                const buscador = $(this).val().trim();
-                if (buscador.length === 0 || buscador.trim().replace(/\s+/g, '').length >= 3) {
-                    buscarMascotas(buscador);
+<script>
+    $(document).ready(function () {
+
+        //Mensaje genérico de error
+        function ActivarToast() {
+            $('#liveToast').toast('show');
+        }
+
+        // Al activar el modal, setea los datos del registro
+        $('.eliminar-btn').click(function () {
+            const id = $(this).data('id');
+            const nombre = $(this).data('nombre');
+            const tipo = $(this).data('tipo');
+
+            $('#nombreMascota').text(nombre);
+            $('#tipoMascota').text(tipo);
+            $('#idMascotaHidden').val(id);
+
+        });
+
+        // Petición ajax que elimina la mascota
+        $('#eliminarMascota').click(function () {
+            const id = $('#idMascotaHidden').val();
+
+            console.log($('#mascotasTabla tbody').find('tr[data-id="' + id + '"]'))
+            
+            $.ajax({
+                url: '@Url.Action("BorrarMascota", "Mascotas")',
+                type: 'POST',
+                data: { mascotaId: id },
+                success: function (result) {
+                   $('#eliminarModal').modal('hide');
+                   $('#mascotasTabla tbody').find('tr[data-id="' + id + '"]').remove();
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                    $('#eliminarModal').modal('hide');
+                    ActivarToast()
                 }
             });
+        });
 
-            function buscarMascotas(coincidencia) {
-                $.ajax({
-                    url: '@Url.Action("BuscarCoincidencias", "Mascotas")',
-                    type: 'GET',
-                    data: { nombre: coincidencia },
-                    success: function (result) {
-                        actualizarTabla(result);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            }
-
-            function actualizarTabla(mascotas) {
-                var tabla = $('#mascotasTabla tbody');
-                tabla.empty();
-                $.each(mascotas, function (index, mascota) {
-                    const { mascotaId, nombre, edad, tipoMascota, tipoMascotaStr } = mascota;
-                    var row = $('<tr></tr>');
-                    row.append('<td>' +
-                        '<a class="btn btn-primary m-2" href="/Mascotas/Editar/' + mascotaId + '">Editar</a>' +
-                        '<a class="btn btn-danger" href="/Mascotas/Borrar/' + mascotaId + '">Eliminar</a>' +
-                        '</td>');
-                    row.append('<td>' + nombre + '</td>');
-                    row.append('<td>' + edad + '</td>');
-                    row.append('<td>' + tipoMascotaStr + '</td>');
-                    tabla.append(row);
-                });
+        // Evento input para buscar a la mascota al escribir
+        $('#buscador').on('input', function () {
+            const buscador = $(this).val().trim();
+            if (buscador.length === 0 || buscador.trim().replace(/\s+/g, '').length >= 3) {
+                buscarMascotas(buscador);
             }
         });
-    </script>
+
+        // Petición ajax que obtiene el json de la busqueda
+        function buscarMascotas(coincidencia) {
+            $.ajax({
+                url: '@Url.Action("BuscarCoincidencias", "Mascotas")',
+                type: 'GET',
+                data: { nombre: coincidencia },
+                success: function (result) {
+                    actualizarTabla(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                    ActivarToast()
+                }
+            });
+        }
+
+        // Función que renderiza de nuevo la tabla con los valores de la búsqueda de mascota
+        function actualizarTabla(mascotas) {
+            var tabla = $('#mascotasTabla tbody');
+            tabla.empty();
+            $.each(mascotas, function (index, mascota) {
+                const { mascotaId, nombre, edad, tipoMascota, tipoMascotaStr } = mascota;
+                var row = $('<tr></tr>');
+                row.append('<td>' +
+                    '<a class="btn btn-primary m-2" href="/Mascotas/Editar/' + mascotaId + '">Editar</a>' +
+                    '<a class="btn btn-danger" href="/Mascotas/Borrar/' + mascotaId + '">Eliminar</a>' +
+                    '</td>');
+                row.append('<td>' + nombre + '</td>');
+                row.append('<td>' + edad + '</td>');
+                row.append('<td>' + tipoMascotaStr + '</td>');
+                tabla.append(row);
+            });
+        }
+    });
+</script>
 }
 
 

@@ -111,7 +111,7 @@ namespace Mascotas.Controllers
         {
             await mascotaRepository.Borrar(mascotaId);
 
-            return RedirectToAction("Index");
+            return Json("Mascota eliminada exitosamente");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
