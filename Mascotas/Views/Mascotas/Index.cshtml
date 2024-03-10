@@ -110,8 +110,6 @@
         // Petición ajax que elimina la mascota
         $('#eliminarMascota').click(function () {
             const id = $('#idMascotaHidden').val();
-
-            console.log($('#mascotasTabla tbody').find('tr[data-id="' + id + '"]'))
             
             $.ajax({
                 url: '@Url.Action("BorrarMascota", "Mascotas")',
