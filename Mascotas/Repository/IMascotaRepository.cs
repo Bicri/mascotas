@@ -24,11 +24,6 @@ public interface IMascotaRepository
     /// <returns></returns>
     public Task<List<MascotaDTO>> BusquedaCoincidencias(string nombre);
     /// <summary>
-    /// Método que inicializa el formulario de creación de mascotas
-    /// </summary>
-    /// <returns></returns>
-    public IEnumerable<SelectListItem> CrearMascota();
-    /// <summary>
     /// Método que crea una nueva mascota
     /// </summary>
     /// <param name="nuevaMascota"></param>

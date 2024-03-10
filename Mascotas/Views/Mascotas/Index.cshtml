@@ -113,7 +113,7 @@
             
             $.ajax({
                 url: '@Url.Action("BorrarMascota", "Mascotas")',
-                type: 'POST',
+                type: 'DELETE',
                 data: { mascotaId: id },
                 success: function (result) {
                    $('#eliminarModal').modal('hide');
@@ -157,20 +157,21 @@
             tabla.empty();
             $.each(mascotas, function (index, mascota) {
                 const { mascotaId, nombre, edad, tipoMascota, tipoMascotaStr } = mascota;
-                var row = $('<tr></tr>');
-                row.append('<td>' +
-                    '<a class="btn btn-primary m-2" href="/Mascotas/Editar/' + mascotaId + '">Editar</a>' +
-                    '<a class="btn btn-danger" href="/Mascotas/Borrar/' + mascotaId + '">Eliminar</a>' +
-                    '</td>');
-                row.append('<td>' + nombre + '</td>');
-                row.append('<td>' + edad + '</td>');
-                row.append('<td>' + tipoMascotaStr + '</td>');
+                const row = $(`<tr data-id="${mascotaId}"></tr>`);
+                row.append(`<td class="align-middle">
+                    <a class="btn btn-primary m-2" href="/Mascotas/Editar/${mascotaId}">Editar</a>
+                    <a class="btn btn-danger eliminar-btn" data-bs-toggle="modal" data-bs-target="#eliminarModal" data-id="${mascotaId}" data-nombre="${nombre}" data-tipo="${tipoMascotaStr}">
+                        Eliminar
+                    </a>
+                    </td>`);
+                row.append(`<td class="align-middle"> ${nombre}</td>`);
+                row.append(`<td class="align-middle"> ${edad}</td>`);
+                row.append(`<td class="align-middle"> ${tipoMascotaStr}</td>`);
                 tabla.append(row);
             });
         }
     });
 </script>
 }
-
 
 

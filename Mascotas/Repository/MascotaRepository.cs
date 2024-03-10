@@ -65,22 +65,6 @@ public class MascotaRepository : IMascotaRepository
         }).ToListAsync();
     }
     /// <summary>
-    /// Método que inicializa el formulario de creación de mascotas
-    /// </summary>
-    /// <returns></returns>
-    public IEnumerable<SelectListItem> CrearMascota()
-    {
-        IEnumerable<SelectListItem> tiposMascotas = Enum.GetValues(typeof(TipoMascota))
-                                                        .Cast<TipoMascota>()
-                                                        .Select(t => new SelectListItem
-                                                        {
-                                                            Value = ((int)t).ToString(),
-                                                            Text = t.ToString()
-                                                        })
-                                                        .ToList();
-        return tiposMascotas;
-    }
-    /// <summary>
     /// Método que crea una nueva mascota
     /// </summary>
     /// <param name="nuevaMascota"></param>

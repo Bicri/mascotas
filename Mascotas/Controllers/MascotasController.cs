@@ -29,7 +29,6 @@ namespace Mascotas.Controllers
         public IActionResult Crear()
         {
             CrearMascotaDTO mascota = new();
-            mascota.ListadoMascotas = mascotaRepository.CrearMascota();
             return View(mascota);
         }
 
@@ -59,18 +58,6 @@ namespace Mascotas.Controllers
             return Json(true);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Crear(CrearMascotaDTO nuevaMascota)
-        {
-            if( ! ModelState.IsValid) {
-                return View(nuevaMascota);
-            }
-
-            await mascotaRepository.CrearMascota(nuevaMascota);
-
-            return RedirectToAction("Index");
-        }
-
         [HttpGet]
         public async Task<IActionResult> BuscarCoincidencias(string nombre)
         {
@@ -78,12 +65,12 @@ namespace Mascotas.Controllers
             return Json(mascotas);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Editar(int id)
         {
             Mascota mascota = await mascotaRepository.ObtenerPorId(id);
 
             ActualizarMascotaDTO mascotaActualizar = new();
-            mascotaActualizar.ListadoMascotas = mascotaRepository.CrearMascota();
 
             mascotaActualizar.MascotaId = mascota.MascotaId;
             mascotaActualizar.Nombre = mascota.Nombre;
@@ -94,6 +81,19 @@ namespace Mascotas.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> Crear(CrearMascotaDTO nuevaMascota)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(nuevaMascota);
+            }
+
+            await mascotaRepository.CrearMascota(nuevaMascota);
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Editar(ActualizarMascotaDTO mascotaActualizar)
         {
             await mascotaRepository.Actualizar(mascotaActualizar);
@@ -101,12 +101,7 @@ namespace Mascotas.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> Borrar(int id)
-        {
-            Mascota mascota = await mascotaRepository.ObtenerPorId(id);
-            return View(mascota);
-        }
-
+        [HttpDelete]
         public async Task<IActionResult> BorrarMascota(int mascotaId)
         {
             await mascotaRepository.Borrar(mascotaId);

@@ -18,5 +18,12 @@ public class CrearMascotaDTO
     [Required(ErrorMessage = "El campo {0} es requerido")]
     public TipoMascota TipoMascotaEscogido { get; set; }
     [Display(Name = "Tipo de mascota")]
-    public IEnumerable<SelectListItem>? ListadoMascotas { get; set; }
+    public IEnumerable<SelectListItem>? ListadoMascotas { get; set; } = Enum.GetValues(typeof(TipoMascota))
+                                                                            .Cast<TipoMascota>()
+                                                                            .Select(t => new SelectListItem
+                                                                            {
+                                                                                Value = ((int)t).ToString(),
+                                                                                Text = t.ToString()
+                                                                            })
+                                                                            .ToList();
 }
